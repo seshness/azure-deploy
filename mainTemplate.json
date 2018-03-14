@@ -33,10 +33,9 @@
       "metadata": {
         "description": "Trifacta application version to deploy"
       },
-      "defaultValue": "4.2.1",
+      "defaultValue": "5.0.0",
       "allowedValues": [
-        "4.2.0",
-        "4.2.1"
+        "5.0.0"
       ]
     },
     "applicationName": {
@@ -85,8 +84,8 @@
   },
   "variables": {
     "trifactaVersionShort": "[replace(parameters('trifactaVersion'), '.', '')]",
-    "branch": "master",
-    "baseUri": "[concat('https://raw.githubusercontent.com/Trifacta/azure-deploy/', variables('branch'))]",
+    "branch": "release/5.0",
+    "baseUri": "[concat('https://raw.githubusercontent.com/seshness/azure-deploy/', variables('branch'))]",
     "armTemplateVersion": "1",
     "trifactaDownloadAccessSignature": "sr=c&si=trifacta-deploy-public-read&sig=ksMPhDkLpJYPEXnRNp4vAdo6QQ9ulpP%2BM4Gsi/nea%2Bg%3D&sv=2016-05-31"
   },
@@ -128,7 +127,8 @@
           {
             "subDomainSuffix": "[parameters('subdomainApplicationURISuffix')]",
             "destinationPort": 3005,
-            "accessModes": ["webpage"]
+            "accessModes": ["webpage"],
+            "disableGatewayAuth": true
           }
         ],
         "applicationType": "CustomApplication"

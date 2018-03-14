@@ -166,34 +166,30 @@ function ConfigureADLS() {
     .hdfs.pathsConfig.sparkEventLogs = \"${adls_prefix}/trifacta/sparkeventlogs\" |
     .hdfs.pathsConfig.batchResults = \"${adls_prefix}/trifacta/queryResults\" |
     .azure.directoryid = \"$adls_directory_id\" |
-    .azure.mode = \"system\" |
+    .azure.adl.mode = \"system\" |
     .azure.adl.enabled = true |
     .azure.adl.store = \"$adls_uri\" |
-    .azure.adl.applicationid = \"$adls_application_id\" |
-    .azure.adl.secret = \"$adls_secret\"" \
+    .azure.wasb.enabled = false |
+    .azure.applicationid = \"$adls_application_id\" |
+    .azure.secret = \"$adls_secret\"" \
     "$triconf" | sponge "$triconf"
 }
 
 function ConfigureWASB() {
   local wasb_service_name=$(GetDefaultFS)
+  local wasb_container=$(echo "$wasb_service_name" | cut -d@ -f1)
   local wasb_host=$(echo "$wasb_service_name" | cut -d@ -f2)
 
   LogInfo "Configuring WASB"
   CheckValueSetOrExit "WASB service name" "$wasb_service_name"
   CheckValueSetOrExit "WASB Host" "$wasb_host"
 
-  jq ".webapp.storageProtocol = \"hdfs\" |
+  jq ".webapp.storageProtocol = \"wasbs\" |
     .hdfs.username = \"$trifacta_user\" |
     .hdfs.enabled = true |
-    .hdfs.protocolOverride = \"wasb\" |
-    .hdfs.namenode.host = \"$wasb_host\" |
-    .hdfs.namenode.port = 50073 |
-    .hdfs.webhdfs.httpfs = true |
-    .hdfs.webhdfs.ssl.enabled = false |
-    .hdfs.webhdfs.host = \"localhost\" |
-    .hdfs.webhdfs.version = \"/WebWasb/webhdfs/v1\" |
-    .hdfs.webhdfs.credentials.username = \"$trifacta_user\" |
-    .hdfs.webhdfs.port = 50073 |
+    .azure.wasb.enabled = true |
+    .azure.wasb.defaultStore.blobHost = \"$wasb_host\" |
+    .azure.wasb.defaultStore.container = \"$wasb_container\" |
     .azure.mode = \"system\" |
     .azure.adl.enabled = false" \
     "$triconf" | sponge "$triconf"

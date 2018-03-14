@@ -2,8 +2,8 @@
 
 set -exo pipefail
 
-version="4.2.1"
-branch="master"
+version="5.0.0"
+branch="release/5.0"
 adls_directory_id="ADLS_DIRECTORY_ID"
 adls_application_id="ADLS_APPLICATION_ID"
 adls_secret="ADLS_APPLICATION_SECRET"
@@ -60,6 +60,8 @@ if [[ -z ${build+x} ]]; then
     build="39"
   elif [[ "$version" == "4.2.1" ]]; then
     build="126"
+  elif [[ "$version" == "5.0.0" ]]; then
+    build="13750"
   else
     LogError "Version \"$version\" not recognized and build number not specified (via -b option)"
   fi
@@ -69,7 +71,7 @@ if [[ -z ${shared_access_signature+x} ]]; then
   LogError "Shared access signature must be specified (via -s option)"
 fi
 
-base_uri="https://raw.githubusercontent.com/Trifacta/azure-deploy/$branch"
+base_uri="https://raw.githubusercontent.com/seshness/azure-deploy/$branch"
 bindir_uri="$base_uri/bin"
 
 function RunScript() {
@@ -114,7 +116,6 @@ for script in $scripts; do
 done
 
 RunScript prepare-edge-node.sh
-RunScript install-webwasb.sh -B "$branch"
 RunScript install-app.sh -v "$version" -b "$build" -s "$shared_access_signature"
 RunScript configure-db.sh
 RunScript configure-app.sh -d "$adls_directory_id" -a "$adls_application_id" -S "$adls_secret"
