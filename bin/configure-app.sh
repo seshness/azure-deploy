@@ -4,27 +4,27 @@ set -exo pipefail
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/util.sh"
 
-adls_directory_id=""
-adls_application_id=""
-adls_secret=""
+directory_id=""
+application_id=""
+secret=""
 
 function Usage() {
   cat << EOF
 Usage: "$0 [options]"
 
 Options:
-  -d <dir ID>    Azure Active Directory directory ID for the registered application. Required when HDI default storage is ADLS. [default: $adls_directory_id]
-  -a <app ID>    Registered application\'s ID. Required when HDI default storage is ADLS. [default: $adls_application_id]
-  -S <secret>    Registered application\'s key for access to ADLS. Required when HDI default storage is ADLS. [default: $adls_secret]
+  -d <dir ID>    Azure Active Directory directory ID for the registered application. Required when HDI default storage is ADLS. [default: $directory_id]
+  -a <app ID>    Registered application\'s ID. Required when HDI default storage is ADLS. [default: $application_id]
+  -S <secret>    Registered application\'s key for access to ADLS. Required when HDI default storage is ADLS. [default: $secret]
   -h             This message.
 EOF
 }
 
 while getopts "u:d:a:S:h" opt; do
   case $opt in
-    d  ) adls_directory_id=$OPTARG ;;
-    a  ) adls_application_id=$OPTARG ;;
-    S  ) adls_secret=$OPTARG ;;
+    d  ) directory_id=$OPTARG ;;
+    a  ) application_id=$OPTARG ;;
+    S  ) secret=$OPTARG ;;
     h  ) Usage && exit 0 ;;
     \? ) LogError "Invalid option: -$OPTARG" ;;
     :  ) LogError "Option -$OPTARG requires an argument." ;;
@@ -143,9 +143,9 @@ function ConfigureADLS() {
   LogInfo "Configuring ADLS"
   CheckValueSetOrExit "ADLS URI" "$adls_uri"
   CheckValueSetOrExit "ADLS Prefix" "$adls_prefix"
-  CheckValueSetOrExit "Directory ID" "$adls_directory_id"
-  CheckValueSetOrExit "Application ID" "$adls_application_id"
-  CheckValueSetOrExit "Secret" "$adls_secret"
+  CheckValueSetOrExit "Directory ID" "$directory_id"
+  CheckValueSetOrExit "Application ID" "$application_id"
+  CheckValueSetOrExit "Secret" "$secret"
 
   jq ".webapp.storageProtocol = \"hdfs\" |
     .hdfs.username = \"$trifacta_user\" |
@@ -165,13 +165,13 @@ function ConfigureADLS() {
     .hdfs.pathsConfig.tempFiles = \"${adls_prefix}/trifacta/tempfiles\" |
     .hdfs.pathsConfig.sparkEventLogs = \"${adls_prefix}/trifacta/sparkeventlogs\" |
     .hdfs.pathsConfig.batchResults = \"${adls_prefix}/trifacta/queryResults\" |
-    .azure.directoryid = \"$adls_directory_id\" |
+    .azure.directoryid = \"$directory_id\" |
     .azure.adl.mode = \"system\" |
     .azure.adl.enabled = true |
     .azure.adl.store = \"$adls_uri\" |
     .azure.wasb.enabled = false |
-    .azure.applicationid = \"$adls_application_id\" |
-    .azure.secret = \"$adls_secret\"" \
+    .azure.applicationid = \"$application_id\" |
+    .azure.secret = \"$secret\"" \
     "$triconf" | sponge "$triconf"
 }
 

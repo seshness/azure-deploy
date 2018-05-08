@@ -11,7 +11,8 @@
     "edgeNodeSize": {
       "type": "string",
       "metadata": {
-        "description": "Virtual machine type for the Trifacta edge node"
+        "description": "Virtual machine type for the Trifacta edge node",
+        "trifactaComment": "Do not change this key."
       },
       "defaultValue": "Standard_D13_V2",
       "allowedValues": [
@@ -41,7 +42,8 @@
     "applicationName": {
       "type": "string",
       "metadata": {
-        "description": "Unique (per-cluster) application name for the Trifacta edge node"
+        "description": "Unique (per-cluster) application name for the Trifacta edge node",
+        "trifactaComment": "Do not change this key."
       },
       "defaultValue": "trifacta"
     },
@@ -53,21 +55,21 @@
       },
       "defaultValue": "tri"
     },
-    "DataLakeStoreDirectoryID": {
+    "DirectoryID": {
       "type": "string",
       "metadata": {
         "description": "Azure Active Directory directory ID for the registered application. Required when HDInsight default storage is Data Lake Store."
       },
       "defaultValue": "<AAD_DIRECTORY_ID>"
     },
-    "DataLakeStoreApplicationID": {
+    "ApplicationID": {
       "type": "string",
       "metadata": {
         "description": "Registered application's ID. Required when HDInsight default storage is Data Lake Store."
       },
       "defaultValue": "<APPLICATION_ID>"
     },
-    "DataLakeStoreSecret": {
+    "Secret": {
       "type": "secureString",
       "metadata": {
         "description": "Registered application's key for access to Data Lake Store. Required when HDInsight default storage is Data Lake Store."
@@ -77,7 +79,8 @@
     "galleryPackageIdentity": {
       "type": "string",
       "metadata": {
-          "description": "Identity of the gallery package for the application."
+        "description": "Identity of the gallery package for the application.",
+        "trifactaComment": "Do not change this key."
       },
       "defaultValue": "wrangler-enterprise"
     }
@@ -112,7 +115,7 @@
           {
             "name": "[concat('trifacta-', variables('trifactaVersionShort'), '-', variables('armTemplateVersion'), '-', uniquestring(parameters('applicationName')))]",
             "uri": "[concat(variables('baseUri'), '/bin/deploy.sh')]",
-            "parameters": "[concat('-v \"', parameters('trifactaVersion'), '\" -B \"', variables('branch'), '\" -s \"', variables('trifactaDownloadAccessSignature'), '\" -d \"', parameters('DataLakeStoreDirectoryID'), '\" -a \"', parameters('DataLakeStoreApplicationID'), '\" -S \"', parameters('DataLakeStoreSecret'), '\"')]",
+            "parameters": "[concat('-v \"', parameters('trifactaVersion'), '\" -B \"', variables('branch'), '\" -s \"', variables('trifactaDownloadAccessSignature'), '\" -d \"', parameters('DirectoryID'), '\" -a \"', parameters('ApplicationID'), '\" -S \"', parameters('Secret'), '\"')]",
             "roles": ["edgenode"]
           }
         ],
