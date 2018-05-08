@@ -8,6 +8,14 @@
         "description": "Name of the existing HDInsight cluster to be used"
       }
     },
+    "galleryPackageIdentity": {
+      "type": "string",
+      "metadata": {
+        "description": "Identity of the gallery package for the application.",
+        "trifactaComment": "Do not change this key."
+      },
+      "defaultValue": "wrangler-enterprise"
+    },
     "edgeNodeSize": {
       "type": "string",
       "metadata": {
@@ -76,13 +84,19 @@
       },
       "defaultValue": "<APPLICATION_SECRET>"
     },
-    "galleryPackageIdentity": {
+    "KeyVaultUrl": {
       "type": "string",
       "metadata": {
-        "description": "Identity of the gallery package for the application.",
-        "trifactaComment": "Do not change this key."
+        "description": "Key Vault URL. Required when HDInsight default storage is Blob Storage."
       },
-      "defaultValue": "wrangler-enterprise"
+      "defaultValue": "https://<KEY_VAULT_NAME>.vault.azure.net/"
+    },
+    "SasTokenId": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of Azure Key Vault Secret containing Shared Access Signature. Required when HDInsight default storage is Blob Storage."
+      },
+      "defaultValue": "<SAS_TOKEN_ID>"
     }
   },
   "variables": {
@@ -115,7 +129,7 @@
           {
             "name": "[concat('trifacta-', variables('trifactaVersionShort'), '-', variables('armTemplateVersion'), '-', uniquestring(parameters('applicationName')))]",
             "uri": "[concat(variables('baseUri'), '/bin/deploy.sh')]",
-            "parameters": "[concat('-v \"', parameters('trifactaVersion'), '\" -B \"', variables('branch'), '\" -s \"', variables('trifactaDownloadAccessSignature'), '\" -d \"', parameters('DirectoryID'), '\" -a \"', parameters('ApplicationID'), '\" -S \"', parameters('Secret'), '\"')]",
+            "parameters": "[concat('-v \"', parameters('trifactaVersion'), '\" -B \"', variables('branch'), '\" -s \"', variables('trifactaDownloadAccessSignature'), '\" -d \"', parameters('DirectoryID'), '\" -a \"', parameters('ApplicationID'), '\" -S \"', parameters('Secret'), '\"', '\" -K \"', parameters('KeyVaultUrl'), '\"', '\" -T \"', parameters('SasTokenId'), '\"')]",
             "roles": ["edgenode"]
           }
         ],

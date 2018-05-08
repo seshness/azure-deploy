@@ -7,6 +7,8 @@ source "$script_dir/util.sh"
 directory_id=""
 application_id=""
 secret=""
+sas_token_id=""
+key_vault_url=""
 
 function Usage() {
   cat << EOF
@@ -16,15 +18,19 @@ Options:
   -d <dir ID>    Azure Active Directory directory ID for the registered application. Required when HDI default storage is ADLS. [default: $directory_id]
   -a <app ID>    Registered application\'s ID. Required when HDI default storage is ADLS. [default: $application_id]
   -S <secret>    Registered application\'s key for access to ADLS. Required when HDI default storage is ADLS. [default: $secret]
+  -T <sas token ID> Shared Access Signature token identifier. Required when HDI storage is WASB.
+  -K <key vault URL> Azure Key Vault URL. Required when HDI storage is WASB.
   -h             This message.
 EOF
 }
 
-while getopts "u:d:a:S:h" opt; do
+while getopts "u:d:a:S:T:K:h" opt; do
   case $opt in
     d  ) directory_id=$OPTARG ;;
     a  ) application_id=$OPTARG ;;
     S  ) secret=$OPTARG ;;
+    T  ) sas_token_id=$OPTARG ;;
+    K  ) key_vault_url=$OPTARG ;;
     h  ) Usage && exit 0 ;;
     \? ) LogError "Invalid option: -$OPTARG" ;;
     :  ) LogError "Option -$OPTARG requires an argument." ;;
@@ -169,7 +175,6 @@ function ConfigureADLS() {
     .azure.adl.mode = \"system\" |
     .azure.adl.enabled = true |
     .azure.adl.store = \"$adls_uri\" |
-    .azure.wasb.enabled = false |
     .azure.applicationid = \"$application_id\" |
     .azure.secret = \"$secret\"" \
     "$triconf" | sponge "$triconf"
@@ -183,6 +188,8 @@ function ConfigureWASB() {
   LogInfo "Configuring WASB"
   CheckValueSetOrExit "WASB service name" "$wasb_service_name"
   CheckValueSetOrExit "WASB Host" "$wasb_host"
+  CheckValueSetOrExit "WASB Shared Access Signature token ID" "$sas_token_id"
+  CheckValueSetOrExit "Azure Key Vault URL" "$key_vault_url"
 
   jq ".webapp.storageProtocol = \"wasbs\" |
     .hdfs.username = \"$trifacta_user\" |
@@ -190,7 +197,8 @@ function ConfigureWASB() {
     .azure.wasb.enabled = true |
     .azure.wasb.defaultStore.blobHost = \"$wasb_host\" |
     .azure.wasb.defaultStore.container = \"$wasb_container\" |
-    .azure.mode = \"system\" |
+    .azure.wasb.defaultStore.sasTokenId = \"$wasb_sas_token_id\" |
+    .azure.keyVaultUrl = \"$key_vault_url\" |
     .azure.adl.enabled = false" \
     "$triconf" | sponge "$triconf"
 }
