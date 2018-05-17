@@ -10,6 +10,8 @@ secret=""
 sas_token_id=""
 key_vault_url=""
 
+# TODO: Figure out what's going on with spark-job-service.classpath
+
 function Usage() {
   cat << EOF
 Usage: "$0 [options]"
