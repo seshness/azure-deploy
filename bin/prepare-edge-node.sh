@@ -39,4 +39,4 @@ apt-get install -y bc libxml2-utils jq moreutils python-pkg-resources
 
 set +e
 LogInfo "Removing conflicting nginx package"
-apt-get purge -y hdinsight-nginx nginx nginx-common nginx-core
+apt-get purge -y hdinsight-nginx nginx nginx-common nginx-core || true
