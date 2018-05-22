@@ -426,29 +426,6 @@ function ConfigureEdgeNode() {
     "$triconf" | sponge "$triconf"
 }
 
-function WorkaroundGatewayBinFiltering() {
-  local tri_file=$(ls "$trifacta_basedir/webapp/src/client/js/entrypoints/trifacta."*.bundle.js)
-  local loader_file="$trifacta_basedir/webapp/src/server/views/photon-pexe-loader.jade"
-  local nginx_conf="$trifacta_basedir/conf/nginx.conf"
-
-  LogInfo "Working around Gateway filtering of downloads containing \"bin\""
-  BackupFile "$tri_file"
-  BackupFile "$loader_file"
-  BackupFile "$nginx_conf"
-
-  LogInfo "Symlinking photon-server files up one directory level"
-  local photon_dir="$trifacta_basedir/photon/dist/pnacl/photon"
-  for photon_file in "$photon_dir/bin/photon-server"*; do
-    filename=$(basename $photon_file)
-    ln -sf "$photon_dir/bin/$filename" "$photon_dir/$filename"
-  done
-
-  LogInfo "Modifying application to use new paths"
-  sed -i 's@/photon/bin@/photon/bun@g' "$tri_file"
-  sed -i 's@/bin/photon-server.nmf@/photon-server.nmf@g' "$loader_file"
-  sed -i 's@/photon/(bin/.*)@/photon/bun/(.*)@g' "$nginx_conf"
-}
-
 function StartTrifacta() {
   LogInfo "Starting Trifacta"
   chmod 666 "$triconf"
@@ -492,8 +469,6 @@ CreateDBRoles
 
 ConfigureEdgeNode
 ConfigureHDI
-
-WorkaroundGatewayBinFiltering
 
 StartTrifacta
 CreateHiveConnection
