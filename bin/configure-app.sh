@@ -410,6 +410,9 @@ function ConfigureEdgeNode() {
   fi
   photon_mem_thresh="50"
 
+  # Secure Token Service: Refresh Token Encryption Key
+  local refresh_token_encryption_key=$(RandomString 16 | base64)
+
   LogInfo "Webapp processes           : $webapp_num_procs"
   LogInfo "Webapp max connections     : $webapp_db_max_connections"
   LogInfo "VFS service processes      : $vfs_num_procs"
@@ -422,7 +425,8 @@ function ConfigureEdgeNode() {
     .[\"vfs-service\"].numProcesses = $vfs_num_procs |
     .batchserver.workers.photon.max  = $photon_num_procs |
     .batchserver.workers.photon.memoryPercentageThreshold = $photon_mem_thresh |
-    .photon.numThreads = $photon_num_threads" \
+    .photon.numThreads = $photon_num_threads |
+    .[\"secure-token-service\"].systemProperties[\"com.trifacta.services.secure_token_service.refresh_token_encryption_key\"] = \"$refresh_token_encryption_key\"" \
     "$triconf" | sponge "$triconf"
 }
 
