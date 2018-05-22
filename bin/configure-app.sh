@@ -143,6 +143,14 @@ function GetDefaultFSType() {
   GetDefaultFS | cut -d: -f1
 }
 
+function ConfigureSecureTokenService() {
+  # Secure Token Service: Refresh Token Encryption Key
+  local refresh_token_encryption_key=$(RandomString 16 | base64)
+
+  jq ".[\"secure-token-service\"].systemProperties[\"server.port\"] = 8090 |
+    .[\"secure-token-service\"].systemProperties[\"com.trifacta.services.secure_token_service.refresh_token_encryption_key\"] = \"$refresh_token_encryption_key\""
+}
+
 function ConfigureAzureCommon() {
   CheckValueSetOrExit "Directory ID" "$directory_id"
   CheckValueSetOrExit "Application ID" "$application_id"
@@ -378,7 +386,6 @@ function ConfigureHDI() {
   CheckValueSetOrExit "Default FS Type" "$fs_type"
 
   ConfigureHDP
-  ConfigureAzureCommon
   if [[ "$fs_type" == "adl" ]]; then
     ConfigureADLS
   elif [[ "$fs_type" == "wasb" ]]; then
@@ -413,9 +420,6 @@ function ConfigureEdgeNode() {
   fi
   photon_mem_thresh="50"
 
-  # Secure Token Service: Refresh Token Encryption Key
-  local refresh_token_encryption_key=$(RandomString 16 | base64)
-
   LogInfo "Webapp processes           : $webapp_num_procs"
   LogInfo "Webapp max connections     : $webapp_db_max_connections"
   LogInfo "VFS service processes      : $vfs_num_procs"
@@ -428,8 +432,7 @@ function ConfigureEdgeNode() {
     .[\"vfs-service\"].numProcesses = $vfs_num_procs |
     .batchserver.workers.photon.max  = $photon_num_procs |
     .batchserver.workers.photon.memoryPercentageThreshold = $photon_mem_thresh |
-    .photon.numThreads = $photon_num_threads |
-    .[\"secure-token-service\"].systemProperties[\"com.trifacta.services.secure_token_service.refresh_token_encryption_key\"] = \"$refresh_token_encryption_key\"" \
+    .photon.numThreads = $photon_num_threads" \
     "$triconf" | sponge "$triconf"
 }
 
@@ -475,6 +478,8 @@ ConfigurePostgres
 CreateDBRoles
 
 ConfigureEdgeNode
+ConfigureSecureTokenService
+ConfigureAzureCommon
 ConfigureHDI
 
 StartTrifacta
