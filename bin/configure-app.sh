@@ -147,7 +147,7 @@ function ConfigureSecureTokenService() {
   # Secure Token Service: Refresh Token Encryption Key
   local refresh_token_encryption_key=$(RandomString 16 | base64)
 
-  jq ".[\"secure-token-service\"].systemProperties[\"server.port\"] = 8090 |
+  jq ".[\"secure-token-service\"].systemProperties[\"server.port\"] = \"8090\" |
     .[\"secure-token-service\"].systemProperties[\"com.trifacta.services.secure_token_service.refresh_token_encryption_key\"] = \"$refresh_token_encryption_key\"" \
     "$triconf" | sponge "$triconf"
 }
