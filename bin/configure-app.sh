@@ -143,6 +143,19 @@ function GetDefaultFSType() {
   GetDefaultFS | cut -d: -f1
 }
 
+function ConfigureAzureCommon() {
+  CheckValueSetOrExit "Directory ID" "$directory_id"
+  CheckValueSetOrExit "Application ID" "$application_id"
+  CheckValueSetOrExit "Secret" "$secret"
+  CheckValueSetOrExit "Azure Key Vault URL" "$key_vault_url"
+
+  jq ".azure.directoryid = \"$directory_id\" |
+    .azure.applicationid = \"$application_id\" |
+    .azure.secret = \"$secret\" |
+    .azure.keyVaultUrl = \"$key_vault_url\"" \
+    "$triconf" | sponge "$triconf"
+}
+
 function ConfigureADLS() {
   local adls_host=$(GetHadoopProperty "dfs.adls.home.hostname" "$core_site")
   local adls_uri="adl://${adls_host}"
@@ -151,9 +164,6 @@ function ConfigureADLS() {
   LogInfo "Configuring ADLS"
   CheckValueSetOrExit "ADLS URI" "$adls_uri"
   CheckValueSetOrExit "ADLS Prefix" "$adls_prefix"
-  CheckValueSetOrExit "Directory ID" "$directory_id"
-  CheckValueSetOrExit "Application ID" "$application_id"
-  CheckValueSetOrExit "Secret" "$secret"
 
   jq ".webapp.storageProtocol = \"hdfs\" |
     .hdfs.username = \"$trifacta_user\" |
@@ -173,12 +183,9 @@ function ConfigureADLS() {
     .hdfs.pathsConfig.tempFiles = \"${adls_prefix}/trifacta/tempfiles\" |
     .hdfs.pathsConfig.sparkEventLogs = \"${adls_prefix}/trifacta/sparkeventlogs\" |
     .hdfs.pathsConfig.batchResults = \"${adls_prefix}/trifacta/queryResults\" |
-    .azure.directoryid = \"$directory_id\" |
     .azure.adl.mode = \"system\" |
     .azure.adl.enabled = true |
-    .azure.adl.store = \"$adls_uri\" |
-    .azure.applicationid = \"$application_id\" |
-    .azure.secret = \"$secret\"" \
+    .azure.adl.store = \"$adls_uri\"" \
     "$triconf" | sponge "$triconf"
 }
 
@@ -191,17 +198,12 @@ function ConfigureWASB() {
   CheckValueSetOrExit "WASB service name" "$wasb_service_name"
   CheckValueSetOrExit "WASB Host" "$wasb_host"
   CheckValueSetOrExit "WASB Shared Access Signature token ID" "$wasb_sas_token_id"
-  CheckValueSetOrExit "Azure Key Vault URL" "$key_vault_url"
 
   jq ".webapp.storageProtocol = \"wasbs\" |
-    .hdfs.username = \"$trifacta_user\" |
-    .hdfs.enabled = true |
     .azure.wasb.enabled = true |
     .azure.wasb.defaultStore.blobHost = \"$wasb_host\" |
     .azure.wasb.defaultStore.container = \"$wasb_container\" |
-    .azure.wasb.defaultStore.sasTokenId = \"$wasb_sas_token_id\" |
-    .azure.keyVaultUrl = \"$key_vault_url\" |
-    .azure.adl.enabled = false" \
+    .azure.wasb.defaultStore.sasTokenId = \"$wasb_sas_token_id\"" \
     "$triconf" | sponge "$triconf"
 }
 
@@ -376,6 +378,7 @@ function ConfigureHDI() {
   CheckValueSetOrExit "Default FS Type" "$fs_type"
 
   ConfigureHDP
+  ConfigureAzureCommon
   if [[ "$fs_type" == "adl" ]]; then
     ConfigureADLS
   elif [[ "$fs_type" == "wasb" ]]; then
