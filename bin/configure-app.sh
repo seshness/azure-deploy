@@ -184,7 +184,7 @@ function ConfigureADLS() {
 
 function ConfigureWASB() {
   local wasb_service_name=$(GetDefaultFS)
-  local wasb_container=$(echo "$wasb_service_name" | cut -d@ -f1)
+  local wasb_container=$(echo "$wasb_service_name" | cut -d@ -f1 | cut -d/ -f3)
   local wasb_host=$(echo "$wasb_service_name" | cut -d@ -f2)
 
   LogInfo "Configuring WASB"
