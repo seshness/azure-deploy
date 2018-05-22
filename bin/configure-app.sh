@@ -7,7 +7,7 @@ source "$script_dir/util.sh"
 directory_id=""
 application_id=""
 secret=""
-sas_token_id=""
+wasb_sas_token_id=""
 key_vault_url=""
 
 # TODO: Figure out what's going on with spark-job-service.classpath
@@ -31,7 +31,7 @@ while getopts "u:d:a:S:T:K:h" opt; do
     d  ) directory_id=$OPTARG ;;
     a  ) application_id=$OPTARG ;;
     S  ) secret=$OPTARG ;;
-    T  ) sas_token_id=$OPTARG ;;
+    T  ) wasb_sas_token_id=$OPTARG ;;
     K  ) key_vault_url=$OPTARG ;;
     h  ) Usage && exit 0 ;;
     \? ) LogError "Invalid option: -$OPTARG" ;;
@@ -190,7 +190,7 @@ function ConfigureWASB() {
   LogInfo "Configuring WASB"
   CheckValueSetOrExit "WASB service name" "$wasb_service_name"
   CheckValueSetOrExit "WASB Host" "$wasb_host"
-  CheckValueSetOrExit "WASB Shared Access Signature token ID" "$sas_token_id"
+  CheckValueSetOrExit "WASB Shared Access Signature token ID" "$wasb_sas_token_id"
   CheckValueSetOrExit "Azure Key Vault URL" "$key_vault_url"
 
   jq ".webapp.storageProtocol = \"wasbs\" |

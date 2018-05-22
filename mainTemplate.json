@@ -129,7 +129,7 @@
           {
             "name": "[concat('trifacta-', variables('trifactaVersionShort'), '-', variables('armTemplateVersion'), '-', uniquestring(parameters('applicationName')))]",
             "uri": "[concat(variables('baseUri'), '/bin/deploy.sh')]",
-            "parameters": "[concat('-v \"', parameters('trifactaVersion'), '\" -B \"', variables('branch'), '\" -s \"', variables('trifactaDownloadAccessSignature'), '\" -d \"', parameters('DirectoryID'), '\" -a \"', parameters('ApplicationID'), '\" -S \"', parameters('Secret'), '\"', '\" -K \"', parameters('KeyVaultUrl'), '\"', '\" -T \"', parameters('SasTokenId'), '\"')]",
+            "parameters": "[concat('-v \"', parameters('trifactaVersion'), '\" -B \"', variables('branch'), '\" -s \"', variables('trifactaDownloadAccessSignature'), '\" -d \"', parameters('DirectoryID'), '\" -a \"', parameters('ApplicationID'), '\" -S \"', parameters('Secret'), '\" -K \"', parameters('KeyVaultUrl'), '\" -T \"', parameters('SasTokenId'), '\"')]",
             "roles": ["edgenode"]
           }
         ],
